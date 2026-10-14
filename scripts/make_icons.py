@@ -109,6 +109,24 @@ def make_icon(size, ss=4):
     return png_bytes(size, size, rows)
 
 
+def make_ico(sizes=(16, 24, 32, 48, 64, 128, 256)):
+    """生成 Windows .ico：内嵌多个PNG 尺寸，electron-builder / NSIS 直接使用"""
+    import io
+    images = [make_icon(s) for s in sizes]
+
+    header = struct.pack('<HHH', 0, 1, len(images))       # reserved, type=icon, count
+    offset = 6 + 16 * len(images)
+    entries, blobs = b'', b''
+    for s, data in zip(sizes, images):
+        entries += struct.pack('<BBBBHHII',
+                               s if s < 256 else 0,       # width (0 = 256)
+                               s if s < 256 else 0,       # height
+                               0, 0, 1, 32, len(data), offset)
+        blobs += data
+        offset += len(data)
+    return header + entries + blobs
+
+
 def main():
     out = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     pub = os.path.join(out, 'public')
@@ -118,6 +136,27 @@ def main():
         with open(path, 'wb') as f:
             f.write(data)
         print('wrote', path, len(data), 'bytes')
+
+    # Windows / Electron 图标
+    ico = os.path.join(out, 'build', 'icon.ico')
+    os.makedirs(os.path.dirname(ico), exist_ok=True)
+    data = make_ico()
+    with open(ico, 'wb') as f:
+        f.write(data)
+    print('wrote', ico, len(data), 'bytes')
+
+    # Android 各密度图标（mipmap-*）
+    android_res = os.path.join(out, 'android', 'app', 'src', 'main', 'res')
+    for folder, px in [('mipmap-mdpi', 48), ('mipmap-hdpi', 72), ('mipmap-xhdpi', 96),
+                       ('mipmap-xxhdpi', 144), ('mipmap-xxxhdpi', 192)]:
+        d = os.path.join(android_res, folder)
+        if not os.path.isdir(d):
+            continue
+        for name, size in [('ic_launcher.png', px), ('ic_launcher_round.png', px),
+                           ('ic_launcher_foreground.png', int(px * 2.5))]:
+            with open(os.path.join(d, name), 'wb') as f:
+                f.write(make_icon(size))
+        print('wrote', folder, f'{px}px')
 
     svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
   <defs>
