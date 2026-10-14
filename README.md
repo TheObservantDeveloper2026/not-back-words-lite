@@ -5,6 +5,12 @@
 一个参考「不背单词」产品思路实现的背单词应用：**纯前端、无需注册、数据只存在你自己设备上**。
 内置小学到 GRE 共 **26,400+ 词** 精选词库，四种练习模式，基于 **SM-2 记忆算法** 安排复习。
 
+### 🚀 在线体验
+
+**[https://theobservantdeveloper2026.github.io/not-back-words-lite/](https://theobservantdeveloper2026.github.io/not-back-words-lite/)**
+
+无需注册，打开即用，学习进度保存在浏览器本地。手机上打开后可通过浏览器菜单「添加到主屏幕」，获得和原生 App 几乎一样的全屏体验。
+
 ---
 
 ## ✨ 功能
@@ -100,11 +106,21 @@ npm run lint        # lint
 
 ### 网页版
 
+线上已部署：**[GitHub Pages](https://theobservantdeveloper2026.github.io/not-back-words-lite/)**
+
+本地预览：
+
 ```bash
-npm run build
+npm run build        # 构建（相对路径，可直接本地打开）
+npm run build:pages  # 构建（GitHub Pages 子路径前缀，自动识别仓库名）
+npm run preview      # 本地预览构建产物
 ```
 
+`build:pages` 会自动从 `package.json` 的 name 或 git remote 推断仓库名，也可以手动指定：`PAGES_BASE=/custom/ npm run build:pages`。
+
 把 `dist/` 目录部署到任意静态托管即可：GitHub Pages、Vercel、Netlify、Cloudflare Pages、Nginx 均可。
+
+仓库内置 `.github/workflows/deploy.yml`，每次push 到 `main` 会自动跑单元测试、构建并发布到 GitHub Pages，无需手动操作。
 
 ### 手机 / 平板（iOS + Android）
 
