@@ -11,6 +11,21 @@
 
 无需注册，打开即用，学习进度保存在浏览器本地。手机上打开后可通过浏览器菜单「添加到主屏幕」，获得和原生 App 几乎一样的全屏体验。
 
+### 📦 客户端下载
+
+全部安装包在 **[Releases 页面](https://github.com/TheObservantDeveloper2026/not-back-words-lite/releases/latest)**。
+
+| 平台 | 文件 | 说明 |
+| --- | --- | --- |
+| 网页版 | — | 直接打开上面的网址，最推荐 |
+| Android | `NotBackWordsLite-1.0.0.apk` | 需在系统设置里允许「安装未知来源应用」 |
+| Windows | `NotBackWordsLite-Setup-1.0.0-x64.exe` | 安装版，可自选安装路径 |
+| Windows | `NotBackWordsLite-Portable-1.0.0-x64.exe` | 免安装版，双击即用 |
+| macOS / Linux | 见仓库 README | 需在对应系统上构建 |
+
+> 安装包未做商业代码签名。Windows SmartScreen 可能提示「未知发布者」，选「更多信息 →仍要运行」；
+> Android 会提示来源未知，选择继续安装即可。
+
 ---
 
 ## ✨ 功能
