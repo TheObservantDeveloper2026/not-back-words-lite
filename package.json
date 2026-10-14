@@ -1,9 +1,11 @@
 {
   "name": "not-back-words-lite",
+  "main": "electron/main.js",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "description": "开源英语单词学习工具：英译汉、汉译英、默写、听写四种练习，SM-2 记忆算法",
+  "author": "TheObservantDeveloper2026",
   "license": "MIT",
   "keywords": [
     "english",
@@ -36,6 +38,8 @@
     "dist:linux": "npm run build && electron-builder --linux"
   },
   "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/core": "^7.6.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "recharts": "^3.10.1"
@@ -54,9 +58,9 @@
     "vitest": "^5.0.4"
   },
   "optionalDependencies": {
-    "@capacitor/cli": "^7.0.0",
-    "electron": "^33.0.0",
-    "electron-builder": "^25.0.0"
+    "@capacitor/cli": "^7.6.9",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
   },
   "build": {
     "appId": "com.notbemoji.app",
@@ -69,6 +73,7 @@
       "output": "release"
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "nsis",
