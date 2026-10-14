@@ -7,6 +7,8 @@ node_modules/
 dist/
 dist-ssr/
 release/
+release-*/
+build/icon.ico
 *.local
 
 # 源词表中间产物（体积大，可用 scripts 重新生成）
@@ -15,6 +17,12 @@ src/data/_raw/
 # Android / iOS（Capacitor 生成）
 android/
 ios/
+
+# 签名密钥（绝不能提交到公开仓库）
+*.keystore
+*.jks
+local.properties
+android/keystore/
 
 # 编辑器
 .vscode/*
