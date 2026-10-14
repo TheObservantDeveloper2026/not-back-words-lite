@@ -28,6 +28,8 @@ export default function App() {
   const app = useAppState()
   const [tab, setTab] = useState<Tab>('home')
   const [practice, setPractice] = useState<PracticeMode | null>(null)
+  /** 练习会话开始时冻结的题目列表，保证一轮内题目稳定不变 */
+  const [sessionWords, setSessionWords] = useState<Word[] | null>(null)
   const [customMeta, setCustomMeta] = useState<BookMeta[]>([])
   const [wordsByBook, setWordsByBook] = useState<Map<string, Word[]>>(new Map())
   const [loadingBook, setLoadingBook] = useState<string | null>(null)
@@ -93,7 +95,25 @@ export default function App() {
     return [...review, ...fresh].slice(0, app.settings.dailyNew + app.settings.dailyReview)
   }, [app.progress, app.settings.dailyNew, app.settings.dailyReview, currentBook, wordsByBook])
 
-  const finishPractice = () => setPractice(null)
+  const finishPractice = () => {
+    setPractice(null)
+    setSessionWords(null)
+  }
+
+  /**
+   * 开始练习：把当前队列快照下来，整个练习过程都用这份固定列表。
+   *
+   * 否则每答一题recordAnswer 都会更新 app.progress → 上面的 queue useMemo 重算 →
+   * 已答过的词从「待复习」变成「学习中」而退出队列 → words[cursor] 在会话中途变成
+   * 另一个词。表现就是：题目会自己变、同一题可能被重复作答、进度错乱。
+   */
+  const startPractice = useCallback(
+    (m: PracticeMode) => {
+      setSessionWords(queue)
+      setPractice(m)
+    },
+    [queue],
+  )
 
   /* ------------------------------- 练习页 ------------------------------- */
   if (practice) {
@@ -101,7 +121,7 @@ export default function App() {
       <Practice
         key={`${practice}-${currentBook}`}
         mode={practice}
-        words={queue}
+        words={sessionWords ?? queue}
         book={currentBook}
         onFinish={finishPractice}
         onExit={finishPractice}
@@ -133,7 +153,7 @@ export default function App() {
           <Home
             books={allBooks}
             wordsByBook={wordsByBook}
-            onStart={(m) => setPractice(m)}
+            onStart={startPractice}
             onPickBook={(id) => updateSettings({ currentBook: id })}
             onGoStats={() => setTab('stats')}
           />
