@@ -27,9 +27,14 @@ jobs:
           node-version: 20
           cache: npm
 
-      # Electron / Capacitor 体积大且构建网页版用不到，跳过可选依赖加速安装
+      # 注意：不要用 --omit=optional。Vite 8 / rolldown 把平台相关的原生二进制
+      # （如 @rolldown/binding-linux-x64-gnu）放在 optionalDependencies 里，
+      # 跳过它们会导致 vitest 和 vite 直接报Cannot find module 而失败。
+      # Electron 的二进制体积大，用 ELECTRON_SKIP_BINARY_DOWNLOAD 跳过其下载即可。
       - name: Install dependencies
-        run: npm ci --omit=optional
+        run: npm ci
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
 
       - name: Unit tests
         run: npm test
