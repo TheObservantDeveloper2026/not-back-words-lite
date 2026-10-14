@@ -6,7 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Word } from '@/data/books'
 import type { PracticeMode } from '@/core/modes'
 import { MODES, buildChoices, spellHint } from '@/core/modes'
-import { checkSpelling, speak, stopSpeaking } from '@/core/speech'
+import { speak, stopSpeaking } from '@/core/speech'
+import { accuracyPercent, judgeChoice, judgeInput } from '@/core/judge'
 import type { AnswerResult } from '@/core/srs'
 import { applyReview } from '@/core/srs'
 import { getProgress, recordAnswer, toggleStar, useAppState } from '@/store'
@@ -37,14 +38,25 @@ export function Practice({ mode, words, book, onFinish, onExit }: PracticeProps)
   const [input, setInput] = useState('')
   const [selected, setSelected] = useState<string | null>(null)
   const [correctCount, setCorrectCount] = useState(0)
+  /** 实际作答次数（不是题目序号）——正确率的分母 */
+  const [answered, setAnswered] = useState(0)
   const [streak, setStreak] = useState(0)
   const [starred, setStarred] = useState(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const startedAt = useRef(Date.now())
+  /**
+   * 已经作答过的题目序号集合。
+   * 队列会因为学习进度更新而在会话中重建，导致同一个 cursor 可能两次拿到不同的
+   * current 对象；如果只用judge.state 做守卫，重建后judge 被重置就能对同一题反复
+   * 作答，correctCount 累加而 cursor 不动，正确率就会突破 100%。
+   * 这里用「题目序号 + 目标词 id」双重锁定，确保一题只记一次。
+   */
+  const answeredKeys = useRef(new Set<string>())
 
   const current = words[cursor]
   const total = words.length
+  const currentKey = current ? `${cursor}:${current.id}` : ''
 
   // 选项（英译汉模式）
   const choices = useMemo(() => {
@@ -59,6 +71,9 @@ export function Practice({ mode, words, book, onFinish, onExit }: PracticeProps)
   }, [mode, current])
 
   // 自动发音（英译汉/默写）或自动播放（听写）
+  // 注意：依赖里用 currentKey（cursor+word.id）而不是 current 对象。
+  // 队列在学习进度更新时会重建，current 会变成新对象；若直接依赖 current，
+  // 每次答题后这个effect 都会重跑并把 judge 重置回idle，导致同一题可重复作答。
   useEffect(() => {
     if (!current) return
     startedAt.current = Date.now()
@@ -75,7 +90,15 @@ export function Practice({ mode, words, book, onFinish, onExit }: PracticeProps)
       }, delay)
       return () => clearTimeout(t)
     }
-  }, [cursor, current, meta.needAudio, mode, app.settings.voice, app.settings.rate, app.settings.autoSpeak])
+  }, [
+    currentKey,
+    current,
+    meta.needAudio,
+    mode,
+    app.settings.voice,
+    app.settings.rate,
+    app.settings.autoSpeak,
+  ])
 
   // 输入模式自动聚焦
   useEffect(() => {
@@ -104,47 +127,51 @@ export function Practice({ mode, words, book, onFinish, onExit }: PracticeProps)
 
   /** 提交当前题 */
   const submit = useCallback(
-    (result: AnswerResult, correct: boolean, given: string, correctAnswer: string) => {
+    (result: AnswerResult, correct: boolean, correctAnswer: string) => {
       if (!current) return
+      // 一题只记一次：重复作答直接忽略，杜绝正确率虚高
+      if (answeredKeys.current.has(currentKey)) return
+      answeredKeys.current.add(currentKey)
+
       const prev = getProgress(current.id, book)
       const nextProgress = applyReview(prev, result)
 
       recordAnswer(current.id, book, nextProgress, correct, (Date.now() - startedAt.current) / 1000)
 
       setJudge(correct ? { state: 'correct' } : { state: 'wrong', correctAnswer })
+      setAnswered((n) => n + 1)
       if (correct) {
         setCorrectCount((c) => c + 1)
         setStreak((s) => s + 1)
       } else {
         setStreak(0)
       }
-      void given
     },
-    [current, book],
+    [current, currentKey, book],
   )
 
   /** 选择答案（英译汉） */
   const choose = useCallback(
     (choiceWord: Word) => {
       if (judge.state !== 'idle' || !current) return
-      const correct = choiceWord.word === current.word
+      if (answeredKeys.current.has(currentKey)) return
+
+      const optionWords = choices.map((c) => c.word)
+      const { correct, answerKey } = judgeChoice(choiceWord.word, current.word, optionWords)
       setSelected(choiceWord.word)
-      // 判分：同单词即正确（选项本身来自目标词）
-      submit(correct ? 'good' : 'again', correct, choiceWord.word, current.word)
+      submit(correct ? 'good' : 'again', correct, answerKey)
     },
-    [judge.state, current, submit],
+    [judge.state, current, currentKey, choices, submit],
   )
 
   /** 提交输入（汉译英/默写/听写） */
   const submitInput = useCallback(() => {
     if (judge.state !== 'idle' || !current || !input.trim()) return
+    if (answeredKeys.current.has(currentKey)) return
 
-    const isEn2CnWrongTarget = false
-    void isEn2CnWrongTarget
-
-    const correct = checkSpelling(input, current.word, mode === 'listen')
-    submit(correct ? 'good' : 'again', correct, input, current.word)
-  }, [judge.state, current, input, mode, submit])
+    const { correct, answerKey } = judgeInput(input, current.word, mode === 'listen')
+    submit(correct ? 'good' : 'again', correct, answerKey)
+  }, [judge.state, current, currentKey, input, mode, submit])
 
   /** 下一题 / 完成 */
   const next = useCallback(() => {
@@ -173,7 +200,9 @@ export function Practice({ mode, words, book, onFinish, onExit }: PracticeProps)
             onClick={() => {
               setCursor(0)
               setCorrectCount(0)
+              setAnswered(0)
               setStreak(0)
+              answeredKeys.current.clear()
             }}
           >
             再练一轮
@@ -386,7 +415,13 @@ export function Practice({ mode, words, book, onFinish, onExit }: PracticeProps)
       {/* 底部进度统计 */}
       <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-xs text-slate-400 dark:border-slate-800">
         <span>
-          正确率 <span className="font-medium text-slate-600 dark:text-slate-300">{total > 0 ? Math.round((correctCount / Math.max(cursor + 1, 1)) * 100) : 0}%</span>
+          正确率{' '}
+          <span className="font-medium text-slate-600 dark:text-slate-300">
+            {accuracyPercent(correctCount, answered)}%
+          </span>
+          <span className="ml-1.5 text-slate-400">
+            ({correctCount}/{answered})
+          </span>
         </span>
         <span>{app.streak > 0 ? `\u{1F525} 连续打卡 ${app.streak} 天` : '开始你的第一次学习吧'}</span>
       </div>
