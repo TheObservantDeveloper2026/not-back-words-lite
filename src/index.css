@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-feature-settings: 'tnum' on, 'lnum' on;
+  }
+
+  /* 深色模式 */
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+
+  /* 移动端禁用双击缩放和点击高亮 */
+  button,
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-sm ring-1 ring-slate-200/70;
+  }
+
+  html.dark .card {
+    @apply bg-slate-900 ring-slate-800;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5
+           text-sm font-medium transition-all duration-150 active:scale-[0.97]
+           disabled:opacity-40 disabled:pointer-events-none select-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20;
+  }
+
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100;
+  }
+
+  html.dark .btn-ghost {
+    @apply text-slate-300 hover:bg-slate-800;
+  }
+
+  .btn-outline {
+    @apply btn ring-1 ring-slate-200 text-slate-700 hover:bg-slate-50;
+  }
+
+  html.dark .btn-outline {
+    @apply ring-slate-700 text-slate-200 hover:bg-slate-800;
+  }
+
+  /* 键盘输入框 */
+  .input {
+    @apply w-full rounded-xl border-0 bg-slate-100 px-4 py-3 text-base
+           ring-1 ring-transparent placeholder:text-slate-400
+           focus:ring-2 focus:ring-brand-500 outline-none transition;
+  }
+
+  html.dark .input {
+    @apply bg-slate-800 text-slate-100 placeholder:text-slate-500;
+  }
+
+  .input-correct {
+    @apply ring-2 ring-emerald-500 bg-emerald-50;
+  }
+
+  html.dark .input-correct {
+    @apply bg-emerald-500/10;
+  }
+
+  .input-wrong {
+    @apply ring-2 ring-rose-500 bg-rose-50;
+  }
+
+  html.dark .input-wrong {
+    @apply bg-rose-500/10;
+  }
+
+  /* 底部导航（移动端） */
+  .nav-item {
+    @apply flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-xl
+           text-[11px] font-medium text-slate-400 transition-colors;
+  }
+
+  .nav-item-active {
+    @apply text-brand-600;
+  }
+
+  html.dark .nav-item-active {
+    @apply text-brand-400;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* 隐藏数字输入框的上下箭头 */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

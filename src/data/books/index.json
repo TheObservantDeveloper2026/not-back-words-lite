@@ -1,0 +1,58 @@
+[
+  {
+    "id": "primary_school",
+    "name": "小学英语",
+    "shortName": "小学",
+    "description": "教育部大纲小学英语词汇，入门起点",
+    "color": "emerald",
+    "totalCount": 441
+  },
+  {
+    "id": "primary",
+    "name": "中考英语",
+    "shortName": "中考",
+    "description": "中考高频核心词，打基础首选",
+    "color": "sky",
+    "totalCount": 1751
+  },
+  {
+    "id": "npee",
+    "name": "高考英语",
+    "shortName": "高考",
+    "description": "高考大纲词汇，涵盖高中全部核心词",
+    "color": "indigo",
+    "totalCount": 5302
+  },
+  {
+    "id": "cet4",
+    "name": "大学英语四级",
+    "shortName": "四级",
+    "description": "CET-4 大纲词汇，含高频短语",
+    "color": "blue",
+    "totalCount": 4529
+  },
+  {
+    "id": "cet6",
+    "name": "大学英语六级",
+    "shortName": "六级",
+    "description": "CET-6 大纲词汇，进阶必备",
+    "color": "violet",
+    "totalCount": 2164
+  },
+  {
+    "id": "toefl",
+    "name": "TOEFL",
+    "shortName": "TOEFL",
+    "description": "托福词汇，覆盖北美学术场景",
+    "color": "rose",
+    "totalCount": 4510
+  },
+  {
+    "id": "gre",
+    "name": "GRE",
+    "shortName": "GRE",
+    "description": "GRE 核心词汇，欧美名校申请词表",
+    "color": "amber",
+    "totalCount": 7721
+  }
+]
