@@ -19,6 +19,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "build:pages": "node scripts/build_pages.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint",
