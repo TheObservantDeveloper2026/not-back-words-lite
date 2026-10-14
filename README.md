@@ -18,9 +18,9 @@
 | 平台 | 文件 | 说明 |
 | --- | --- | --- |
 | 网页版 | — | 直接打开上面的网址，最推荐 |
-| Android | `NotBackWordsLite-1.0.0.apk` | 需在系统设置里允许「安装未知来源应用」 |
-| Windows | `NotBackWordsLite-Setup-1.0.0-x64.exe` | 安装版，可自选安装路径 |
-| Windows | `NotBackWordsLite-Portable-1.0.0-x64.exe` | 免安装版，双击即用 |
+| Android | `NotBackWordsLite-1.0.1.apk` | 需在系统设置里允许「安装未知来源应用」 |
+| Windows | `NotBackWordsLite-Setup-1.0.1-x64.exe` | 安装版，可自选安装路径 |
+| Windows | `NotBackWordsLite-Portable-1.0.1-x64.exe` | 免安装版，双击即用 |
 | macOS / Linux | 见仓库 README | 需在对应系统上构建 |
 
 > 安装包未做商业代码签名。Windows SmartScreen 可能提示「未知发布者」，选「更多信息 →仍要运行」；
